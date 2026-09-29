@@ -29,7 +29,7 @@ for (i in 1:n){
 
 mean(boot_np_var_de_medias)
 mean(boot_np_vicio)
-mean(ifelse(boot_np_quantis[,1] <= 1 & boot_np_quantis[,2] >= 1, 1, 0)))
+mean(ifelse(boot_np_quantis[,1] <= 1 & boot_np_quantis[,2] >= 1, 1, 0))
 
 #jackknife
 jack_var_de_medias <- numeric(n)
@@ -42,14 +42,19 @@ for (i in 1:n){
         amostra_jack <- amostra[-j]
         medias_jack[j] <- mean(amostra_jack)
     }
-    jack_var_de_medias[i] <- (19/20) * var(medias_jack)
+    jack_var_de_medias[i] <- (19/20) * var(medias_jack) * 19
     jack_vicio[i] <- mean(medias_jack) - 1
-    jack_quantis[i,] <- quantile(medias_jack, c(0.025, 0.975))
+    ### jack_quantis[i,] <- quantile(medias_jack, c(0.025, 0.975)) errado
+    jack_quantis[i,] <- mean(medias_jack) + qnorm(c(0.025, 0.975)) * sqrt(jack_var_de_medias[i])
 }
 
 mean(jack_var_de_medias)
 mean(jack_vicio)
-mean(ifelse(jack_quantis[,1] <= 1 & jack_quantis[,2] >= 1, 1, 0))
+
+mean(ifelse(jack_quantis[,1] <= 1 & jack_quantis[,2] >= 1, 1, 0)) 
+## isso  tá errado, pois o jackknife não é usado para construir intervalos de confiança, mas sim para estimar o viés e a variância do estimador.
+# versão correta: calcular o intervalo de confiança usando a distribuição normal, com base na média e no desvio padrão das médias jackknife.
+
 
 #bootstrap paramétrico
 boot_p_var_de_medias <- numeric(n)
